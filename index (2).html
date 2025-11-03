@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YouTube再生テスト</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      text-align: center;
+      background: #fafafa;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { font-size: 22px; }
+    .controls {
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    input {
+      width: min(400px, 90vw);
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      padding: 8px 14px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    iframe {
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 16/9;
+      border: none;
+      border-radius: 8px;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>YouTube再生テスト</h1>
+
+  <div class="controls">
+    <input id="ytUrl" type="url" placeholder="YouTubeのURLを貼り付け">
+    <button id="loadYtBtn">読み込み</button>
+  </div>
+
+  <iframe id="ytPlayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+
+  <script>
+    // URLから動画IDを取り出す関数
+    function parseYouTube(urlStr){
+      try{
+        const u = new URL(urlStr);
+        const host = u.hostname.replace(/^www\./, '');
+        let id = null;
+        if (host === 'youtube.com' || host === 'm.youtube.com'){
+          if (u.pathname === '/watch') id = u.searchParams.get('v');
+          else if (u.pathname.startsWith('/shorts/')) id = u.pathname.split('/')[2];
+          else if (u.pathname.startsWith('/live/'))   id = u.pathname.split('/')[2];
+        } else if (host === 'youtu.be'){
+          id = u.pathname.slice(1);
+        }
+        return id;
+      }catch{return null;}
+    }
+
+    // ボタン押下で再生
+    const ytUrl = document.getElementById('ytUrl');
+    const loadYtBtn = document.getElementById('loadYtBtn');
+    const ytPlayer = document.getElementById('ytPlayer');
+
+    loadYtBtn.addEventListener('click', ()=>{
+      const id = parseYouTube(ytUrl.value.trim());
+      if (!id){
+        alert("URLを正しく認識できませんでした");
+        return;
+      }
+      ytPlayer.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0`;
+    });
+  </script>
+</body>
+</html>
