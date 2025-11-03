@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>YouTube再生テスト</title>
+  <title>YouTube音あり再生テスト</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -12,7 +12,7 @@
       margin: 0;
       padding: 20px;
     }
-    h1 { font-size: 22px; }
+    h1 { font-size: 22px; margin-bottom: 20px; }
     .controls {
       margin-bottom: 12px;
       display: flex;
@@ -38,49 +38,69 @@
       border-radius: 8px;
       background: #000;
     }
+    .hint {
+      color: #666;
+      font-size: 13px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
-  <h1>YouTube再生テスト</h1>
+  <h1>YouTube音あり再生テスト</h1>
 
   <div class="controls">
     <input id="ytUrl" type="url" placeholder="YouTubeのURLを貼り付け">
     <button id="loadYtBtn">読み込み</button>
   </div>
 
-  <iframe id="ytPlayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  <iframe id="ytPlayer"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen></iframe>
 
+  <p class="hint">
+    🔊 「読み込み」ボタンを押すと音付きで自動再生を試みます。<br>
+    iPhoneやSafariでは自動再生が無音または停止する場合があります。<br>
+    その場合は ▶ ボタンを押すと音が出ます。
+  </p>
+
   <script>
-    // URLから動画IDを取り出す関数
-    function parseYouTube(urlStr){
-      try{
+    // --- URLから動画IDを取り出す関数 ---
+    function parseYouTube(urlStr) {
+      try {
         const u = new URL(urlStr);
         const host = u.hostname.replace(/^www\./, '');
         let id = null;
-        if (host === 'youtube.com' || host === 'm.youtube.com'){
+        if (host === 'youtube.com' || host === 'm.youtube.com') {
           if (u.pathname === '/watch') id = u.searchParams.get('v');
           else if (u.pathname.startsWith('/shorts/')) id = u.pathname.split('/')[2];
           else if (u.pathname.startsWith('/live/'))   id = u.pathname.split('/')[2];
-        } else if (host === 'youtu.be'){
+        } else if (host === 'youtu.be') {
           id = u.pathname.slice(1);
         }
         return id;
-      }catch{return null;}
+      } catch {
+        return null;
+      }
     }
 
-    // ボタン押下で再生
+    // --- 要素取得 ---
     const ytUrl = document.getElementById('ytUrl');
     const loadYtBtn = document.getElementById('loadYtBtn');
     const ytPlayer = document.getElementById('ytPlayer');
 
-    loadYtBtn.addEventListener('click', ()=>{
+    // --- 読み込みボタン押下時 ---
+    loadYtBtn.addEventListener('click', () => {
       const id = parseYouTube(ytUrl.value.trim());
-      if (!id){
+      if (!id) {
         alert("URLを正しく認識できませんでした");
         return;
       }
-      ytPlayer.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0`;
+
+      // ★ mute=1 を外して音声あり再生を試す
+      ytPlayer.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+
+      // （参考）もし確実に音ありを優先したいなら autoplay を外して手動再生にする
+      // ytPlayer.src = `https://www.youtube.com/embed/${id}?rel=0`;
     });
   </script>
 </body>
